@@ -80,5 +80,5 @@ def plot_combined_results(csv_files, save_path=None):
 
 if __name__ == "__main__":
     # Provide a list of specific file paths
-    files_to_plot = ['VGGBN.csv', 'VGGpre.csv']
+    files_to_plot = ['training_log.csv', 'ResNet_result.csv']
     plot_combined_results(files_to_plot, save_path='combined_results1.png')

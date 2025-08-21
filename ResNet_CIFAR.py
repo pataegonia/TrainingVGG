@@ -1,62 +1,36 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
-from torchvision.transforms import functional as TF
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import os
 import math
-import random
 import csv
 
 # 1. Dataset paths and hyperparameter settings
 TRAIN_DATA_DIR = './train'
 VAL_DATA_DIR = './val'
 BATCH_SIZE = 128
-TARGET_STEPS = 600000
+TARGET_STEPS = 64000
 LEARNING_RATE = 0.1
 NUM_CLASSES = 10
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 MODEL_SAVE_DIR = './models'
-RESULTS_FILE = './training_results.csv'
+RESULTS_FILE = './training_results_10.csv'
 
 os.makedirs(MODEL_SAVE_DIR, exist_ok=True)
 
-class RandomShortSideResize:
-    def __init__(self, min_size=256, max_size=480):
-        self.min_size = min_size
-        self.max_size = max_size
-    def __call__(self, img):
-        size = random.randint(self.min_size, self.max_size)  # 균일 샘플
-        w, h = img.size
-        if w < h:
-            new_w, new_h = size, int(h * size / w)
-        else:
-            new_h, new_w = size, int(w * size / h)
-        return TF.resize(img, (new_h, new_w))
-
 # 2. Data preprocessing and DataLoader setup
-train_transform = transforms.Compose([
-    RandomShortSideResize(256, 480),       # 논문: shorter-side in [256,480]
-    transforms.RandomHorizontalFlip(p=0.5),
-    transforms.RandomCrop(224),            # 논문: random 224×224 crop
-    transforms.ColorJitter(                # [21]의 color augmentation 근사
-        brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1
-    ),
+transform = transforms.Compose([
+    transforms.Resize((32, 32)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225]),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-# 검증/테스트는 통상 shorter-side 256 → CenterCrop 224
-val_transform = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(224),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225]),
-])
-train_dataset = datasets.ImageFolder(root=TRAIN_DATA_DIR, transform=train_transform)
-val_dataset = datasets.ImageFolder(root=VAL_DATA_DIR, transform=val_transform)
+train_dataset = datasets.ImageFolder(root=TRAIN_DATA_DIR, transform=transform)
+val_dataset = datasets.ImageFolder(root=VAL_DATA_DIR, transform=transform)
 
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
@@ -66,91 +40,66 @@ EPOCHS = math.ceil(TARGET_STEPS / steps_per_epoch)
 
 # 3. Custom CNN Model Definition
 # "Baseline" CNN, 논문의 CNN 구조를 참조하여 CustomCNN class 내부 구성을 수정하세요.
+N = 3
+
 class CustomCNN(nn.Module):
-    # 내부용 아주 작은 residual 블록 모듈(Sequential 안에서 skip을 수행)
+    # CIFAR-10 설정: option A (identity shortcut + zero-pad), 3x3-3x3 BasicBlock
     class Residual(nn.Module):
         def __init__(self, in_ch, out_ch, stride=1):
             super().__init__()
+            self.in_ch  = in_ch
+            self.out_ch = out_ch
+            self.stride = stride
+
             self.conv1 = nn.Conv2d(in_ch, out_ch, 3, stride=stride, padding=1, bias=False)
             self.bn1   = nn.BatchNorm2d(out_ch)
             self.relu  = nn.ReLU(inplace=True)
             self.conv2 = nn.Conv2d(out_ch, out_ch, 3, stride=1, padding=1, bias=False)
             self.bn2   = nn.BatchNorm2d(out_ch)
 
-            # downsample: 채널/해상도 정합이 필요할 때만 1x1/stride
-            self.down = None
-            if stride != 1 or in_ch != out_ch:
-                self.down = nn.Sequential(
-                    nn.Conv2d(in_ch, out_ch, 1, stride=stride, bias=False),
-                    nn.BatchNorm2d(out_ch),
-                )
-
         def forward(self, x):
             identity = x
             out = self.relu(self.bn1(self.conv1(x)))
             out = self.bn2(self.conv2(out))
-            if self.down is not None:
-                identity = self.down(x)
+
+            # --- Option A: identity shortcut ---
+            if self.stride != 1:  # 해상도 줄일 때
+                identity = F.avg_pool2d(identity, kernel_size=1, stride=self.stride)
+            if self.in_ch != self.out_ch:  # 채널 늘릴 때 0-padding
+                pad_c = self.out_ch - self.in_ch
+                zeros = torch.zeros(identity.size(0), pad_c, identity.size(2), identity.size(3),
+                                    device=identity.device, dtype=identity.dtype)
+                identity = torch.cat([identity, zeros], dim=1)
+
             out = self.relu(out + identity)
             return out
 
-    def __init__(self, num_classes):
+    def __init__(self, num_classes, n: int = N):
         super(CustomCNN, self).__init__()
 
-        # stem: 7x7 conv 64, /2 → 3x3 maxpool, /2
+        # --- stem: 3x3 conv, C=16 (stride=1), no pooling ---
         stem = [
-            nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False),
-            nn.BatchNorm2d(64),
+            nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
         ]
 
-        # layer1: 64 x 3 (첫 블록 stride=1)
-        l1 = [
-            CustomCNN.Residual(64, 64, stride=1),
-            CustomCNN.Residual(64, 64, stride=1),
-            CustomCNN.Residual(64, 64, stride=1),
-        ]
+        # stage 구성: 각 stage에 블록 n개(= 2n conv layers), 첫 블록만 stride=2
+        # 출력 맵 크기: 32x32 -> 16x16 -> 8x8, 채널: 16 -> 32 -> 64
+        l1 = [CustomCNN.Residual(16, 16, stride=1) for _ in range(n)]
+        l2 = [CustomCNN.Residual(16, 32, stride=2)] + \
+             [CustomCNN.Residual(32, 32, stride=1) for _ in range(n-1)]
+        l3 = [CustomCNN.Residual(32, 64, stride=2)] + \
+             [CustomCNN.Residual(64, 64, stride=1) for _ in range(n-1)]
 
-        # layer2: 128 x 4 (첫 블록 stride=2, downsample)
-        l2 = [
-            CustomCNN.Residual(64, 128, stride=2),
-            CustomCNN.Residual(128, 128, stride=1),
-            CustomCNN.Residual(128, 128, stride=1),
-            CustomCNN.Residual(128, 128, stride=1),
-        ]
+        # features = stem + (stage1,2,3)
+        self.features = nn.Sequential(*stem, *l1, *l2, *l3)
 
-        # layer3: 256 x 6 (첫 블록 stride=2)
-        l3 = [
-            CustomCNN.Residual(128, 256, stride=2),
-            CustomCNN.Residual(256, 256, stride=1),
-            CustomCNN.Residual(256, 256, stride=1),
-            CustomCNN.Residual(256, 256, stride=1),
-            CustomCNN.Residual(256, 256, stride=1),
-            CustomCNN.Residual(256, 256, stride=1),
-        ]
-
-        # layer4: 512 x 3 (첫 블록 stride=2)
-        l4 = [
-            CustomCNN.Residual(256, 512, stride=2),
-            CustomCNN.Residual(512, 512, stride=1),
-            CustomCNN.Residual(512, 512, stride=1),
-        ]
-
-        # features = stem + 모든 residual block들을 하나의 Sequential로
-        self.features = nn.Sequential(
-            *stem,
-            *l1,
-            *l2,
-            *l3,
-            *l4,
-        )
-
-        # head
+        # head: Global Average Pooling -> FC(num_classes)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.classifier = nn.Linear(512, num_classes)
+        self.classifier = nn.Linear(64, num_classes)
 
-        # He(Kaiming) init(선택)
+        # He(Kaiming) 초기화
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
@@ -158,10 +107,10 @@ class CustomCNN(nn.Module):
                 nn.init.ones_(m.weight); nn.init.zeros_(m.bias)
 
     def forward(self, x):
-        x = self.features(x)          # stem → [64]×3 → [128]×4 → [256]×6 → [512]×3
-        x = self.avgpool(x)           # GAP
+        x = self.features(x)     # 32x32 -> 16x16 -> 8x8
+        x = self.avgpool(x)      # 1x1
         x = torch.flatten(x, 1)
-        x = self.classifier(x)        # FC
+        x = self.classifier(x)
         return x
 
 # 4. Initialize model, loss function, and optimizer
