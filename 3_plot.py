@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import numpy as np
 
 def plot_three_results(csv_a, csv_b, csv_c, save_path=None):
     """
@@ -8,6 +9,7 @@ def plot_three_results(csv_a, csv_b, csv_c, save_path=None):
     from exactly three CSV files.
 
     CSV는 각 파일에 'epoch', 'train_loss', 'val_loss', 'val_accuracy' 열을 포함해야 함.
+    x축은 epoch 대신 모든 러닝을 0~1 구간으로 정규화해서 표시함.
     """
     csv_files = [csv_a, csv_b, csv_c]
     labels = [os.path.basename(p).rsplit(".", 1)[0] for p in csv_files]
@@ -32,22 +34,23 @@ def plot_three_results(csv_a, csv_b, csv_c, save_path=None):
 
     # 3개 서브플롯
     fig, axes = plt.subplots(1, 3, figsize=(24, 8))
-    fig.suptitle("Comparison of Training Metrics (3 runs)", fontsize=20)
+    fig.suptitle("Comparison of Training Metrics (3 runs, normalized x-axis)", fontsize=20)
 
     # 공통 그리기 함수
     def plot_metric(ax, col, title, ylabel):
         for label, df in zip(labels, dataframes):
-            ax.plot(df["epoch"], df[col], label=label)
+            x = np.linspace(0, 1, len(df[col]))  # 0~1 정규화
+            ax.plot(x, df[col], label=label)
         ax.set_title(title, fontsize=16)
-        ax.set_xlabel("Epoch", fontsize=12)
+        ax.set_xlabel("Training Progress (0~1)", fontsize=12)
         ax.set_ylabel(ylabel, fontsize=12)
         ax.grid(True)
         ax.legend()
 
     # Plot들
-    plot_metric(axes[0], "train_loss", "Training Loss over Epochs", "Loss")
-    plot_metric(axes[1], "val_loss", "Validation Loss over Epochs", "Loss")
-    plot_metric(axes[2], "val_accuracy", "Validation Accuracy over Epochs", "Accuracy (%)")
+    plot_metric(axes[0], "train_loss", "Training Loss over Progress", "Loss")
+    plot_metric(axes[1], "val_loss", "Validation Loss over Progress", "Loss")
+    plot_metric(axes[2], "val_accuracy", "Validation Accuracy over Progress", "Accuracy (%)")
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
 
@@ -61,8 +64,8 @@ def plot_three_results(csv_a, csv_b, csv_c, save_path=None):
 if __name__ == "__main__":
     # 예시: 세 파일을 지정하여 저장
     plot_three_results(
-        "training_results.csv",
-        "VGGBN.csv",
-        "VGGpre.csv",
-        save_path="combined_results_3runs.png"
+        "VGGBN_.csv",
+        "ResNet34.csv",
+        "ResNet50.csv",
+        save_path="VSVGG.png"
     )
