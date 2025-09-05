@@ -16,10 +16,10 @@ LEARNING_RATE = 0.01
 WEIGHT_DECAY = 4e-5
 EPOCHS = 100
 NUM_CLASSES = 10
-IMAGE_SIZE = 192
+IMAGE_SIZE = 128
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 MODEL_SAVE_DIR = './models'
-RESULTS_FILE = './1MobileNet192.csv'
+RESULTS_FILE = './1MobileNet128.csv'
 
 os.makedirs(MODEL_SAVE_DIR, exist_ok=True)
 

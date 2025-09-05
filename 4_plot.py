@@ -64,9 +64,9 @@ def plot_four_results(csv_a, csv_b, csv_c, csv_d, save_path=None):
 if __name__ == "__main__":
     # 예시 실행
     plot_four_results(
-        "ResNet34.csv",
-        "ResNet50.csv",
-        "ResNet101.csv",
-        "ResNet152.csv",
-        save_path="ResNet.png"
+        "CSV/1MobileNet128.csv",
+        "CSV/1MobileNet160.csv",
+        "CSV/1MobileNet192.csv",
+        "CSV/1MobileNet224.csv",
+        save_path="1MobileNet.png"
     )
