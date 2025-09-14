@@ -1,159 +1,189 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.optim.lr_scheduler import ExponentialLR
-from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
+from torch.utils.data import DataLoader, Dataset
+from torchvision import transforms
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+from PIL import Image
 import os
 import csv
-from torchinfo import summary  # pip install torchinfo
+import numpy as np
 
 # 1. Dataset paths and hyperparameter settings
-TRAIN_DATA_DIR = './train'
-VAL_DATA_DIR = './val'
-BATCH_SIZE = 96
-LEARNING_RATE = 0.01
-WEIGHT_DECAY = 4e-5
-EPOCHS = 100
-NUM_CLASSES = 10
-IMAGE_SIZE = 192
+TRAIN_DATA_DIR = './train' # Assuming this now contains 'images' and 'masks' subdirectories
+VAL_DATA_DIR = './val'     # Assuming this now contains 'images' and 'masks' subdirectories
+BATCH_SIZE = 8  # U-Net often uses smaller batch sizes
+LEARNING_RATE = 0.0001 # U-Net often uses lower learning rates with Adam
+EPOCHS = 74
+NUM_CLASSES = 2 # Binary segmentation (e.g., foreground/background). Adjust if multi-class.
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 MODEL_SAVE_DIR = './models'
-RESULTS_FILE = './1MobileNet192.csv'
+RESULTS_FILE = './training_results_unet.csv'
 
 os.makedirs(MODEL_SAVE_DIR, exist_ok=True)
 
-# 2. Data preprocessing and DataLoader setup
-train_transform = transforms.Compose([
-    transforms.RandomResizedCrop(IMAGE_SIZE),
-    transforms.RandomHorizontalFlip(),
-    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.05),  # color distortions
+# 2. Data preprocessing and DataLoader setup (Modified for U-Net, assumes image and mask pairs)
+
+class UNetDataset(Dataset):
+    def __init__(self, root_dir, transform=None):
+        self.root_dir = root_dir
+        self.image_dir = os.path.join(root_dir, 'images')
+        self.mask_dir = os.path.join(root_dir, 'masks')
+        self.transform = transform
+        self.image_filenames = sorted(os.listdir(self.image_dir))
+
+    def __len__(self):
+        return len(self.image_filenames)
+
+    def __getitem__(self, idx):
+        img_name = self.image_filenames[idx]
+        img_path = os.path.join(self.image_dir, img_name)
+        mask_path = os.path.join(self.mask_dir, img_name.replace('.jpg', '.png')) # Assuming masks are .png and have same base name
+        
+        image = Image.open(img_path).convert("RGB")
+        mask = Image.open(mask_path).convert("L") # Masks are typically grayscale
+
+        if self.transform:
+            # Apply same transformation to both image and mask
+            # For segmentation, transforms must be carefully applied.
+            # Here, we'll resize and then convert to tensor.
+            # Normalization should only apply to the image.
+            image = self.transform['image'](image)
+            mask = self.transform['mask'](mask)
+            
+        return image, mask.long() # Masks should be long tensors for CrossEntropyLoss
+
+# Define transforms for image and mask separately, then combine
+image_transform = transforms.Compose([
+    transforms.Resize((256, 256)), # U-Net paper used larger inputs (572x572), here for simplicity
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                         std=[0.229, 0.224, 0.225])
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-val_transform = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(224),
+mask_transform = transforms.Compose([
+    transforms.Resize((256, 256), interpolation=transforms.InterpolationMode.NEAREST), # Nearest for masks to preserve labels
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                         std=[0.229, 0.224, 0.225])
+    # No normalization for masks
 ])
 
-train_dataset = datasets.ImageFolder(root=TRAIN_DATA_DIR, transform=train_transform)
-val_dataset = datasets.ImageFolder(root=VAL_DATA_DIR, transform=val_transform)
+unet_transforms = {'image': image_transform, 'mask': mask_transform}
+
+train_dataset = UNetDataset(root_dir=TRAIN_DATA_DIR, transform=unet_transforms)
+val_dataset = UNetDataset(root_dir=VAL_DATA_DIR, transform=unet_transforms)
 
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
-# 3. Custom CNN Model Definition
-# "Baseline" CNN, 논문의 CNN 구조를 참조하여 CustomCNN class 내부 구성을 수정하세요.
-
-class DepthwiseSeparableConv(nn.Module):
-    def __init__(self, in_channels, out_channels, stride):
+# 3. U-Net Model Definition (according to U-Net paper)
+class DoubleConv(nn.Module):
+    """(convolution => BN => ReLU) * 2"""
+    def __init__(self, in_channels, out_channels):
         super().__init__()
-        self.depthwise = nn.Conv2d(
-            in_channels, in_channels, kernel_size=3, stride=stride,
-            padding=1, groups=in_channels, bias=False
-        )
-        self.bn_dw = nn.BatchNorm2d(in_channels)     # ✅ depthwise용 BN
-
-        self.pointwise = nn.Conv2d(
-            in_channels, out_channels, kernel_size=1, stride=1,
-            padding=0, bias=False
-        )
-        self.bn_pw = nn.BatchNorm2d(out_channels)    # ✅ pointwise용 BN
-        self.relu = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.depthwise(x)
-        x = self.bn_dw(x)    # ✅ in_channels 크기와 일치
-        x = self.relu(x)
-        x = self.pointwise(x)
-        x = self.bn_pw(x)    # ✅ out_channels 크기와 일치
-        x = self.relu(x)
-        return x
-    
-
-def make_divisible(v, divisor=8):
-    return int((v + divisor / 2) // divisor * divisor)
-    
-
-class CustomCNN(nn.Module):
-    def __init__(self, num_classes, alpha: float = 1.0):
-        super(CustomCNN, self).__init__()
-        c=lambda x: make_divisible(x * alpha)
-        # Initial standard convolution
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(3, c(32), kernel_size=3, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(c(32)),
+        self.double_conv = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
+            nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True)
         )
 
-        # MobileNet body
-        self.features = nn.Sequential(
-            DepthwiseSeparableConv(c(32),  c(64),  1),
-            DepthwiseSeparableConv(c(64),  c(128), 2),
-            DepthwiseSeparableConv(c(128), c(128), 1),
-            DepthwiseSeparableConv(c(128), c(256), 2),
-            DepthwiseSeparableConv(c(256), c(256), 1),
-            DepthwiseSeparableConv(c(256), c(512), 2),
-            DepthwiseSeparableConv(c(512), c(512), 1),
-            DepthwiseSeparableConv(c(512), c(512), 1),
-            DepthwiseSeparableConv(c(512), c(512), 1),
-            DepthwiseSeparableConv(c(512), c(512), 1),
-            DepthwiseSeparableConv(c(512), c(512), 1),
-            DepthwiseSeparableConv(c(512), c(1024), 2),
-            DepthwiseSeparableConv(c(1024), c(1024), 1),
-        )
+    def forward(self, x):
+        return self.double_conv(x)
 
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 1)) # Global Average Pooling
-        self.classifier = nn.Sequential(
-            nn.Dropout(p=0.001),
-            nn.Linear(c(1024), num_classes)
+class Down(nn.Module):
+    """Downscaling with maxpool then double conv"""
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        self.maxpool_conv = nn.Sequential(
+            nn.MaxPool2d(2),
+            DoubleConv(in_channels, out_channels)
         )
 
     def forward(self, x):
-        x = self.conv1(x)
-        x = self.features(x)
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
-        x = self.classifier(x)
-        return x
+        return self.maxpool_conv(x)
 
-# 4. Initialize model, loss function, and optimizer
-model = CustomCNN(num_classes=NUM_CLASSES, alpha=1).to(DEVICE)
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.RMSprop(
-    model.parameters(),
-    lr=LEARNING_RATE,
-    momentum=0.9,
-    alpha=0.9, 
-    eps=0.1,
-    weight_decay=WEIGHT_DECAY
+class Up(nn.Module):
+    """Upscaling then double conv"""
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        self.up = nn.ConvTranspose2d(in_channels , in_channels // 2, kernel_size=2, stride=2)
+        self.conv = DoubleConv(in_channels, out_channels)
+
+    def forward(self, x1, x2):
+        x1 = self.up(x1)
+        # input is CHW
+        diffY = x2.size()[2] - x1.size()[2]
+        diffX = x2.size()[3] - x1.size()[3]
+
+        x1 = nn.functional.pad(x1, [diffX // 2, diffX - diffX // 2,
+                                    diffY // 2, diffY - diffY // 2])
+        x = torch.cat([x2, x1], dim=1)
+        return self.conv(x)
+
+class OutConv(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(OutConv, self).__init__()
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=1)
+
+    def forward(self, x):
+        return self.conv(x)
+
+class UNet(nn.Module):
+    def __init__(self, n_channels, n_classes):
+        super(UNet, self).__init__()
+        self.n_channels = n_channels
+        self.n_classes = n_classes
+
+        self.inc = DoubleConv(n_channels, 64)
+        self.down1 = Down(64, 128)
+        self.down2 = Down(128, 256)
+        self.down3 = Down(256, 512)
+        self.down4 = Down(512, 1024)
+        self.up1 = Up(1024, 512)
+        self.up2 = Up(512, 256)
+        self.up3 = Up(256, 128)
+        self.up4 = Up(128, 64)
+        self.outc = OutConv(64, n_classes)
+
+    def forward(self, x):
+        x1 = self.inc(x)
+        x2 = self.down1(x1)
+        x3 = self.down2(x2)
+        x4 = self.down3(x3)
+        x5 = self.down4(x4)
+        x = self.up1(x5, x4)
+        x = self.up2(x, x3)
+        x = self.up3(x, x2)
+        x = self.up4(x, x1)
+        logits = self.outc(x)
+        return logits
+
+# 4. Initialize model, loss function, and optimizer (Modified for U-Net)
+model = UNet(n_channels=3, n_classes=NUM_CLASSES).to(DEVICE) # 3 channels for RGB images
+criterion = nn.CrossEntropyLoss() # Standard for multi-class semantic segmentation
+optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE) # Adam is often preferred for U-Net
+
+scheduler = ReduceLROnPlateau(
+    optimizer, mode='max', factor=0.1, patience=10, verbose=True # Increased patience for U-Net
 )
-scheduler = ExponentialLR(optimizer, gamma=0.98)
 
+# Function to calculate Dice Score (common metric for segmentation)
+def dice_score(pred, target, smooth=1e-6):
+    pred = torch.argmax(pred, dim=1) # Get predicted class for each pixel
+    pred = pred.contiguous().view(-1)
+    target = target.contiguous().view(-1)
+    
+    intersection = (pred * target).sum()
+    dice = (2. * intersection + smooth) / (pred.sum() + target.sum() + smooth)
+    return dice
 
-print("================== Model Analysis ==================")
-input_size = (1, 3, 224, 224)
-summary_info = summary(model, input_size=input_size, verbose=0, device=DEVICE)
-
-total_params = summary_info.total_params / 1_000_000
-print(f"Total Parameters: {total_params:.2f} Million")
-
-# MACs (Million Mult-Adds)
-total_macs = summary_info.total_mult_adds / 1_000_000
-print(f"Total MACs (Mult-Adds): {total_macs:.2f} Million")
-print("====================================================")
-
-# 5. Training and validation function
+# 5. Training and validation function (Modified for U-Net with Dice Score)
 def train_model():
-    best_accuracy = 0.0
+    best_dice_score = 0.0
     
     with open(RESULTS_FILE, 'w', newline='') as csvfile:
-        fieldnames = ['epoch', 'train_loss', 'val_loss', 'val_accuracy']
+        fieldnames = ['epoch', 'train_loss', 'val_loss', 'val_dice_score']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
@@ -161,12 +191,12 @@ def train_model():
             # Training phase
             model.train()
             running_loss = 0.0
-            # Wrap the DataLoader with tqdm for a progress bar
-            for inputs, labels in train_loader:
-                inputs, labels = inputs.to(DEVICE), labels.to(DEVICE)
+            for inputs, masks in train_loader:
+                inputs, masks = inputs.to(DEVICE), masks.to(DEVICE).squeeze(1) # Squeeze mask channel if it's (B, 1, H, W) to (B, H, W)
+                
                 optimizer.zero_grad()
                 outputs = model(inputs)
-                loss = criterion(outputs, labels)
+                loss = criterion(outputs, masks)
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
@@ -175,41 +205,37 @@ def train_model():
             
             # Validation phase
             model.eval()
-            correct = 0
-            total = 0
+            total_dice_score = 0.0
             val_loss = 0.0
-            # Wrap the DataLoader with tqdm for a progress bar
             with torch.no_grad():
-                for inputs, labels in val_loader:
-                    inputs, labels = inputs.to(DEVICE), labels.to(DEVICE)
+                for inputs, masks in val_loader:
+                    inputs, masks = inputs.to(DEVICE), masks.to(DEVICE).squeeze(1)
                     outputs = model(inputs)
-                    loss = criterion(outputs, labels)
+                    loss = criterion(outputs, masks)
                     val_loss += loss.item()
-                    _, predicted = torch.max(outputs.data, 1)
-                    total += labels.size(0)
-                    correct += (predicted == labels).sum().item()
+                    total_dice_score += dice_score(outputs, masks).item()
             
             val_loss /= len(val_loader)
-            accuracy = 100 * correct / total
-            
-            print(f"Epoch [{epoch+1}/{EPOCHS}], Train Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}, Validation Accuracy: {accuracy:.2f}%")
+            avg_dice_score = total_dice_score / len(val_loader)
+
+            scheduler.step(avg_dice_score) # Schedule based on Dice score
+
+            print(f"Epoch [{epoch+1}/{EPOCHS}], Train Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}, Validation Dice Score: {avg_dice_score:.4f}")
             
             writer.writerow({
                 'epoch': epoch + 1,
                 'train_loss': train_loss,
                 'val_loss': val_loss,
-                'val_accuracy': accuracy
+                'val_dice_score': avg_dice_score
             })
             
-            if accuracy > best_accuracy:
-                best_accuracy = accuracy
-                model_path = os.path.join(MODEL_SAVE_DIR, f'best_model.pth')
+            if avg_dice_score > best_dice_score:
+                best_dice_score = avg_dice_score
+                model_path = os.path.join(MODEL_SAVE_DIR, f'unet_best_model.pth')
                 torch.save(model.state_dict(), model_path)
-                print(f"New best model saved at: {model_path} with accuracy: {best_accuracy:.2f}%")
-
-            scheduler.step()
+                print(f"New best model saved at: {model_path} with Dice Score: {best_dice_score:.4f}")
 
 # 6. Start training
 if __name__ == '__main__':
     train_model()
-    print("Training and validation finished! Results saved to training_results.csv.")
+    print("U-Net training and validation finished! Results saved to training_results_unet.csv.")
