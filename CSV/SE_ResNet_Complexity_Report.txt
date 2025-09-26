@@ -1,0 +1,50 @@
+==========================================================================================
+SE-ResNet Models Complexity Analysis (Theoretical Calculation)
+==========================================================================================
+Model           Parameters      FLOPs (Est.)    Model Size (MB) Blocks              
+------------------------------------------------------------------------------------------
+SE-ResNet-50    26.04M          3.49G           99.35MB        [3, 4, 6, 3]
+SE-ResNet-101   47.26M          7.20G           180.30MB        [3, 4, 23, 3]
+SE-ResNet-152   64.74M          10.92G          246.97MB        [3, 8, 36, 3]
+==========================================================================================
+
+Detailed Breakdown:
+--------------------------------------------------
+
+SE-ResNet-50:
+  - Architecture: [3, 4, 6, 3] blocks per layer
+  - Total layers: 16 residual blocks
+  - SE reduction ratio: 16
+  - Expansion factor: 4 (bottleneck)
+  - Total parameters: 26.04M
+    * Stem: 9.54K (0.0%)
+    * Residual blocks: 26.01M (99.9%)
+    * Classifier: 20.49K (0.1%)
+
+SE-ResNet-101:
+  - Architecture: [3, 4, 23, 3] blocks per layer
+  - Total layers: 33 residual blocks
+  - SE reduction ratio: 16
+  - Expansion factor: 4 (bottleneck)
+  - Total parameters: 47.26M
+    * Stem: 9.54K (0.0%)
+    * Residual blocks: 47.23M (99.9%)
+    * Classifier: 20.49K (0.0%)
+
+SE-ResNet-152:
+  - Architecture: [3, 8, 36, 3] blocks per layer
+  - Total layers: 50 residual blocks
+  - SE reduction ratio: 16
+  - Expansion factor: 4 (bottleneck)
+  - Total parameters: 64.74M
+    * Stem: 9.54K (0.0%)
+    * Residual blocks: 64.71M (100.0%)
+    * Classifier: 20.49K (0.0%)
+
+==========================================================================================
+Notes:
+- Parameters: Exact theoretical count
+- FLOPs: Simplified estimation (actual may vary)
+- Model Size: Memory requirement assuming float32
+- SE blocks add ~2-3% parameters compared to standard ResNet
+==========================================================================================

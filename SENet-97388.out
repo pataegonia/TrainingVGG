@@ -1,0 +1,166 @@
+==== JOB START : Thu 25 Sep 2025 05:26:43 PM KST ====
+/data/clue9986/anaconda3/bin/python
+Epoch [1/120], Train Loss: 3.0172, Val Loss: 2.2938, Val Accuracy: 16.99%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 16.99%
+Epoch [2/120], Train Loss: 2.2404, Val Loss: 2.1486, Val Accuracy: 21.32%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 21.32%
+Epoch [3/120], Train Loss: 2.1765, Val Loss: 2.1125, Val Accuracy: 22.62%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 22.62%
+Epoch [4/120], Train Loss: 2.1275, Val Loss: 2.0658, Val Accuracy: 27.62%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 27.62%
+Epoch [5/120], Train Loss: 2.0744, Val Loss: 2.0326, Val Accuracy: 28.23%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 28.23%
+Epoch [6/120], Train Loss: 2.0076, Val Loss: 1.9016, Val Accuracy: 31.52%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 31.52%
+Epoch [7/120], Train Loss: 1.9618, Val Loss: 1.8847, Val Accuracy: 32.46%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 32.46%
+Epoch [8/120], Train Loss: 1.9719, Val Loss: 2.3503, Val Accuracy: 15.80%, LR: 0.1
+Epoch [9/120], Train Loss: 2.0966, Val Loss: 1.9810, Val Accuracy: 30.04%, LR: 0.1
+Epoch [10/120], Train Loss: 1.9857, Val Loss: 1.8373, Val Accuracy: 36.03%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 36.03%
+Epoch [11/120], Train Loss: 1.8731, Val Loss: 1.6618, Val Accuracy: 43.57%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 43.57%
+Epoch [12/120], Train Loss: 1.7855, Val Loss: 1.6058, Val Accuracy: 44.13%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 44.13%
+Epoch [13/120], Train Loss: 1.7174, Val Loss: 1.5672, Val Accuracy: 44.99%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 44.99%
+Epoch [14/120], Train Loss: 1.6266, Val Loss: 1.5345, Val Accuracy: 47.16%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 47.16%
+Epoch [15/120], Train Loss: 1.5599, Val Loss: 1.3443, Val Accuracy: 54.96%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 54.96%
+Epoch [16/120], Train Loss: 1.4926, Val Loss: 1.3026, Val Accuracy: 56.43%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 56.43%
+Epoch [17/120], Train Loss: 1.4291, Val Loss: 1.2428, Val Accuracy: 58.50%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 58.50%
+Epoch [18/120], Train Loss: 1.3772, Val Loss: 1.1742, Val Accuracy: 62.80%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 62.80%
+Epoch [19/120], Train Loss: 1.3387, Val Loss: 1.2392, Val Accuracy: 57.78%, LR: 0.1
+Epoch [20/120], Train Loss: 1.3096, Val Loss: 1.2617, Val Accuracy: 58.47%, LR: 0.1
+Epoch [21/120], Train Loss: 1.2944, Val Loss: 1.2215, Val Accuracy: 59.13%, LR: 0.1
+Epoch [22/120], Train Loss: 1.3242, Val Loss: 1.1179, Val Accuracy: 64.69%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 64.69%
+Epoch [23/120], Train Loss: 1.2187, Val Loss: 1.2365, Val Accuracy: 68.08%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 68.08%
+Epoch [24/120], Train Loss: 1.2304, Val Loss: 1.2170, Val Accuracy: 59.64%, LR: 0.1
+Epoch [25/120], Train Loss: 1.2677, Val Loss: 1.0015, Val Accuracy: 67.29%, LR: 0.1
+Epoch [26/120], Train Loss: 1.1703, Val Loss: 0.9830, Val Accuracy: 69.43%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 69.43%
+Epoch [27/120], Train Loss: 1.1106, Val Loss: 0.8832, Val Accuracy: 71.85%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 71.85%
+Epoch [28/120], Train Loss: 1.0568, Val Loss: 0.8700, Val Accuracy: 73.04%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 73.04%
+Epoch [29/120], Train Loss: 1.0939, Val Loss: 0.8998, Val Accuracy: 71.03%, LR: 0.1
+Epoch [30/120], Train Loss: 1.0598, Val Loss: 0.7866, Val Accuracy: 74.60%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 74.60%
+Epoch [31/120], Train Loss: 1.0106, Val Loss: 0.7641, Val Accuracy: 74.96%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 74.96%
+Epoch [32/120], Train Loss: 0.9768, Val Loss: 0.7695, Val Accuracy: 74.83%, LR: 0.1
+Epoch [33/120], Train Loss: 0.9491, Val Loss: 0.7501, Val Accuracy: 76.08%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 76.08%
+Epoch [34/120], Train Loss: 0.9220, Val Loss: 0.9149, Val Accuracy: 70.50%, LR: 0.1
+Epoch [35/120], Train Loss: 0.8983, Val Loss: 0.7114, Val Accuracy: 76.97%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 76.97%
+Epoch [36/120], Train Loss: 0.8835, Val Loss: 0.6501, Val Accuracy: 79.72%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 79.72%
+Epoch [37/120], Train Loss: 0.8756, Val Loss: 0.6888, Val Accuracy: 77.45%, LR: 0.1
+Epoch [38/120], Train Loss: 0.8767, Val Loss: 0.9872, Val Accuracy: 77.30%, LR: 0.1
+Epoch [39/120], Train Loss: 0.8356, Val Loss: 0.7311, Val Accuracy: 78.09%, LR: 0.1
+Epoch [40/120], Train Loss: 0.8645, Val Loss: 0.6589, Val Accuracy: 78.73%, LR: 0.1
+Epoch [41/120], Train Loss: 0.8211, Val Loss: 1.1207, Val Accuracy: 69.99%, LR: 0.1
+Epoch [42/120], Train Loss: 0.9115, Val Loss: 0.7418, Val Accuracy: 75.95%, LR: 0.1
+Epoch [43/120], Train Loss: 0.8636, Val Loss: 0.6785, Val Accuracy: 78.19%, LR: 0.1
+Epoch [44/120], Train Loss: 0.8278, Val Loss: 0.6173, Val Accuracy: 80.79%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 80.79%
+Epoch [45/120], Train Loss: 0.7911, Val Loss: 0.6397, Val Accuracy: 78.90%, LR: 0.1
+Epoch [46/120], Train Loss: 0.7545, Val Loss: 0.6028, Val Accuracy: 80.15%, LR: 0.1
+Epoch [47/120], Train Loss: 0.7544, Val Loss: 0.5639, Val Accuracy: 81.73%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 81.73%
+Epoch [48/120], Train Loss: 0.7428, Val Loss: 0.6295, Val Accuracy: 79.67%, LR: 0.1
+Epoch [49/120], Train Loss: 0.7393, Val Loss: 0.5769, Val Accuracy: 81.86%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 81.86%
+Epoch [50/120], Train Loss: 0.7185, Val Loss: 0.5753, Val Accuracy: 81.22%, LR: 0.1
+Epoch [51/120], Train Loss: 0.7013, Val Loss: 0.5976, Val Accuracy: 80.51%, LR: 0.1
+Epoch [52/120], Train Loss: 0.6980, Val Loss: 0.6105, Val Accuracy: 80.54%, LR: 0.1
+Epoch [53/120], Train Loss: 0.7374, Val Loss: 0.5683, Val Accuracy: 81.71%, LR: 0.1
+Epoch [54/120], Train Loss: 0.6959, Val Loss: 0.6710, Val Accuracy: 78.27%, LR: 0.1
+Epoch [55/120], Train Loss: 0.6756, Val Loss: 0.5865, Val Accuracy: 81.53%, LR: 0.1
+Epoch [56/120], Train Loss: 0.6421, Val Loss: 0.6257, Val Accuracy: 81.53%, LR: 0.1
+Epoch [57/120], Train Loss: 0.6478, Val Loss: 0.5675, Val Accuracy: 81.71%, LR: 0.1
+Epoch [58/120], Train Loss: 0.6346, Val Loss: 0.5502, Val Accuracy: 82.68%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 82.68%
+Epoch [59/120], Train Loss: 0.6430, Val Loss: 0.5593, Val Accuracy: 82.17%, LR: 0.1
+Epoch [60/120], Train Loss: 0.6184, Val Loss: 0.5572, Val Accuracy: 81.63%, LR: 0.1
+Epoch [61/120], Train Loss: 0.6252, Val Loss: 0.6271, Val Accuracy: 84.23%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 84.23%
+Epoch [62/120], Train Loss: 0.6128, Val Loss: 0.7249, Val Accuracy: 83.72%, LR: 0.1
+Epoch [63/120], Train Loss: 0.6087, Val Loss: 0.5328, Val Accuracy: 83.01%, LR: 0.1
+Epoch [64/120], Train Loss: 0.6199, Val Loss: 0.4548, Val Accuracy: 85.45%, LR: 0.1
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 85.45%
+Epoch [65/120], Train Loss: 0.6009, Val Loss: 0.5478, Val Accuracy: 83.03%, LR: 0.1
+Epoch [66/120], Train Loss: 0.6055, Val Loss: 0.5720, Val Accuracy: 82.65%, LR: 0.1
+Epoch [67/120], Train Loss: 0.6035, Val Loss: 0.5874, Val Accuracy: 85.04%, LR: 0.1
+Epoch [68/120], Train Loss: 0.5846, Val Loss: 0.6234, Val Accuracy: 84.31%, LR: 0.1
+Epoch [69/120], Train Loss: 0.5818, Val Loss: 0.9705, Val Accuracy: 79.62%, LR: 0.1
+Epoch [70/120], Train Loss: 0.6762, Val Loss: 0.6347, Val Accuracy: 81.35%, LR: 0.1
+Epoch [71/120], Train Loss: 0.6109, Val Loss: 1.0891, Val Accuracy: 83.90%, LR: 0.1
+Epoch [72/120], Train Loss: 0.6008, Val Loss: 0.5604, Val Accuracy: 83.26%, LR: 0.1
+Epoch [73/120], Train Loss: 0.5826, Val Loss: 0.5216, Val Accuracy: 84.66%, LR: 0.1
+Epoch [74/120], Train Loss: 0.5806, Val Loss: 0.5603, Val Accuracy: 84.54%, LR: 0.1
+Epoch [75/120], Train Loss: 0.5768, Val Loss: 0.8085, Val Accuracy: 83.29%, LR: 0.1
+Epoch [76/120], Train Loss: 0.4717, Val Loss: 0.7272, Val Accuracy: 87.29%, LR: 0.010000000000000002
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 87.29%
+Epoch [77/120], Train Loss: 0.4172, Val Loss: 0.9402, Val Accuracy: 87.59%, LR: 0.010000000000000002
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 87.59%
+Epoch [78/120], Train Loss: 0.4049, Val Loss: 0.5179, Val Accuracy: 88.56%, LR: 0.010000000000000002
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 88.56%
+Epoch [79/120], Train Loss: 0.4031, Val Loss: 0.3705, Val Accuracy: 88.59%, LR: 0.010000000000000002
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 88.59%
+Epoch [80/120], Train Loss: 0.3854, Val Loss: 0.6345, Val Accuracy: 89.02%, LR: 0.010000000000000002
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 89.02%
+Epoch [81/120], Train Loss: 0.3677, Val Loss: 0.8580, Val Accuracy: 88.43%, LR: 0.010000000000000002
+Epoch [82/120], Train Loss: 0.3719, Val Loss: 0.3540, Val Accuracy: 88.61%, LR: 0.010000000000000002
+Epoch [83/120], Train Loss: 0.3662, Val Loss: 0.5834, Val Accuracy: 88.74%, LR: 0.010000000000000002
+Epoch [84/120], Train Loss: 0.3789, Val Loss: 0.7822, Val Accuracy: 88.89%, LR: 0.010000000000000002
+Epoch [85/120], Train Loss: 0.3554, Val Loss: 0.9061, Val Accuracy: 89.22%, LR: 0.010000000000000002
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 89.22%
+Epoch [86/120], Train Loss: 0.3665, Val Loss: 0.8120, Val Accuracy: 89.45%, LR: 0.010000000000000002
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 89.45%
+Epoch [87/120], Train Loss: 0.3455, Val Loss: 4.0786, Val Accuracy: 88.82%, LR: 0.010000000000000002
+Epoch [88/120], Train Loss: 0.3463, Val Loss: 3.1586, Val Accuracy: 89.22%, LR: 0.010000000000000002
+Epoch [89/120], Train Loss: 0.3518, Val Loss: 1.0053, Val Accuracy: 89.35%, LR: 0.010000000000000002
+Epoch [90/120], Train Loss: 0.3298, Val Loss: 0.6090, Val Accuracy: 88.99%, LR: 0.010000000000000002
+Epoch [91/120], Train Loss: 0.3339, Val Loss: 0.3482, Val Accuracy: 89.35%, LR: 0.010000000000000002
+Epoch [92/120], Train Loss: 0.3436, Val Loss: 1.2810, Val Accuracy: 89.45%, LR: 0.010000000000000002
+Epoch [93/120], Train Loss: 0.3404, Val Loss: 0.9071, Val Accuracy: 89.04%, LR: 0.010000000000000002
+Epoch [94/120], Train Loss: 0.3180, Val Loss: 0.5459, Val Accuracy: 89.10%, LR: 0.010000000000000002
+Epoch [95/120], Train Loss: 0.3335, Val Loss: 0.3467, Val Accuracy: 89.48%, LR: 0.010000000000000002
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 89.48%
+Epoch [96/120], Train Loss: 0.3604, Val Loss: 9.4220, Val Accuracy: 85.68%, LR: 0.010000000000000002
+Epoch [97/120], Train Loss: 0.3420, Val Loss: 60.2086, Val Accuracy: 85.58%, LR: 0.010000000000000002
+Epoch [98/120], Train Loss: 0.3271, Val Loss: 3.3211, Val Accuracy: 88.92%, LR: 0.010000000000000002
+Epoch [99/120], Train Loss: 0.3344, Val Loss: 11.8533, Val Accuracy: 88.23%, LR: 0.010000000000000002
+Epoch [100/120], Train Loss: 0.3290, Val Loss: 11.4282, Val Accuracy: 88.61%, LR: 0.010000000000000002
+Epoch [101/120], Train Loss: 0.3221, Val Loss: 11.4926, Val Accuracy: 88.94%, LR: 0.010000000000000002
+Epoch [102/120], Train Loss: 0.3169, Val Loss: 2.6054, Val Accuracy: 88.87%, LR: 0.010000000000000002
+Epoch [103/120], Train Loss: 0.3067, Val Loss: 13.3543, Val Accuracy: 88.05%, LR: 0.010000000000000002
+Epoch [104/120], Train Loss: 0.3304, Val Loss: 3.2985, Val Accuracy: 89.53%, LR: 0.010000000000000002
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 89.53%
+Epoch [105/120], Train Loss: 0.3052, Val Loss: 11.0788, Val Accuracy: 88.94%, LR: 0.010000000000000002
+Epoch [106/120], Train Loss: 0.3130, Val Loss: 14.5533, Val Accuracy: 88.89%, LR: 0.010000000000000002
+Epoch [107/120], Train Loss: 0.2854, Val Loss: 9.9103, Val Accuracy: 89.43%, LR: 0.0010000000000000002
+Epoch [108/120], Train Loss: 0.2755, Val Loss: 19.5290, Val Accuracy: 89.45%, LR: 0.0010000000000000002
+Epoch [109/120], Train Loss: 0.2696, Val Loss: 4.9674, Val Accuracy: 89.78%, LR: 0.0010000000000000002
+New best model saved at: ./models/best_model_se_resnet101.pth with accuracy: 89.78%
+Epoch [110/120], Train Loss: 0.2836, Val Loss: 10.0814, Val Accuracy: 89.43%, LR: 0.0010000000000000002
+Epoch [111/120], Train Loss: 0.2854, Val Loss: 9.9117, Val Accuracy: 89.53%, LR: 0.0010000000000000002
+Epoch [112/120], Train Loss: 0.2749, Val Loss: 7.8195, Val Accuracy: 89.71%, LR: 0.0010000000000000002
+Epoch [113/120], Train Loss: 0.2589, Val Loss: 10.1381, Val Accuracy: 89.50%, LR: 0.0010000000000000002
+Epoch [114/120], Train Loss: 0.2653, Val Loss: 8.3052, Val Accuracy: 89.58%, LR: 0.0010000000000000002
+Epoch [115/120], Train Loss: 0.2625, Val Loss: 20.6647, Val Accuracy: 89.45%, LR: 0.0010000000000000002
+Epoch [116/120], Train Loss: 0.2652, Val Loss: 19.3588, Val Accuracy: 89.40%, LR: 0.0010000000000000002
+Epoch [117/120], Train Loss: 0.2700, Val Loss: 13.2305, Val Accuracy: 89.66%, LR: 0.0010000000000000002
+Epoch [118/120], Train Loss: 0.2610, Val Loss: 41.2941, Val Accuracy: 89.38%, LR: 0.00010000000000000003
+Epoch [119/120], Train Loss: 0.2585, Val Loss: 23.1084, Val Accuracy: 89.45%, LR: 0.00010000000000000003
+Epoch [120/120], Train Loss: 0.2700, Val Loss: 39.6827, Val Accuracy: 89.20%, LR: 0.00010000000000000003
+Training and validation finished! Results saved to SENet101.csv.
+====JOB END : Thu 25 Sep 2025 07:55:37 PM KST ====
