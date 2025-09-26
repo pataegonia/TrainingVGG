@@ -284,4 +284,3 @@ def train_model():
 # 7. Start training
 if __name__ == '__main__':
     train_model()
-    print("Training and validation finished! Results saved to SENet.csv.")
