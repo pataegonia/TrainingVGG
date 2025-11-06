@@ -64,8 +64,8 @@ def plot_three_results(csv_a, csv_b, csv_c, save_path=None):
 if __name__ == "__main__":
     # 예시: 세 파일을 지정하여 저장
     plot_three_results(
-        "VGGBN_.csv",
-        "ResNet34.csv",
-        "ResNet50.csv",
+        "SENet_16.csv",
+        "CSV/SENet_8.csv",
+        "SENet.csv",
         save_path="VSVGG.png"
     )
